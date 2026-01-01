@@ -75,7 +75,7 @@ const Navbar = () => {
                     <NavItem to="/" icon={<LayoutDashboard size={18} />} label="Dashboard" active={isActive('/')} />
                     <NavItem to="/profile" icon={<User size={18} />} label="Profil" active={isActive('/profile')} />
 
-                    {user.is_staff && (
+                    {(user.is_staff || user.is_admin) && (
                         <NavItem
                             to="/admin"
                             icon={<Shield size={18} />}
@@ -209,7 +209,7 @@ const Navbar = () => {
                         <Link to="/profile" onClick={closeMenu} style={mobileNavItemStyle(isActive('/profile'))}>
                             <User size={20} /> Profil
                         </Link>
-                        {user.is_staff && (
+                        {(user.is_staff || user.is_admin) && (
                             <Link to="/admin" onClick={closeMenu} style={mobileNavItemStyle(isActive('/admin'))}>
                                 <Shield size={20} /> Boshqaruv
                             </Link>

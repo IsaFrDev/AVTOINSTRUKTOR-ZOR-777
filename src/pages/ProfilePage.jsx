@@ -40,6 +40,22 @@ const ProfilePage = () => {
     const handleSave = async () => {
         setLoading(true);
         try {
+            // Check if this is the local admin
+            if (user.id === 'admin-id-777') {
+                const updatedUser = { ...user, ...formData };
+
+                // Create a clean copy for storage WITHOUT the profile picture (it's stored separately)
+                const storageUser = { ...updatedUser };
+                delete storageUser.profile_picture;
+
+                localStorage.setItem('local_admin_session', JSON.stringify(storageUser));
+                setUser(updatedUser);
+                setIsEditing(false);
+                alert("Profil muvaffaqiyatli yangilandi (Local Admin)");
+                return;
+            }
+
+            // Regular Supabase user
             const { data, error } = await supabase
                 .from('profiles')
                 .update(formData)
@@ -48,9 +64,18 @@ const ProfilePage = () => {
                 .single();
 
             if (error) throw error;
-            setUser({ ...user, ...data });
+
+            // Preserve the local profile picture if it exists
+            const localPic = localStorage.getItem(`profile_picture_${user.id}`);
+            const updatedUser = { ...user, ...data };
+            if (localPic) {
+                updatedUser.profile_picture = localPic;
+            }
+
+            setUser(updatedUser);
             setIsEditing(false);
         } catch (error) {
+            console.error(error);
             alert('Tizimda xatolik yuz berdi. Iltimos qaytadan urunib ko\'ring.');
         } finally {
             setLoading(false);
@@ -58,43 +83,49 @@ const ProfilePage = () => {
     };
 
     const handleFileChange = async (e) => {
-        // Supabase Storage requires creating a bucket.
-        // Assuming user creates a bucket named 'avatars'.
         const file = e.target.files[0];
         if (!file) return;
 
+        // Validatsiya (o'lcham): 10MB limit (User request, though localStorage might fail)
+        if (file.size > 10 * 1024 * 1024) {
+            alert("Rasm hajmi juda katta. Iltimos 10MB dan kichik rasm yuklang. (LocalStorage cheklovi)");
+            return;
+        }
+
         setUploading(true);
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${user.id}.${fileExt}`;
-            const filePath = `${fileName}`;
+            // Convert to Base64
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result;
 
-            // Upload image
-            const { error: uploadError } = await supabase.storage
-                .from('avatars')
-                .upload(filePath, file, { upsert: true });
+                try {
+                    // 1. Save to separate localStorage key
+                    localStorage.setItem(`profile_picture_${user.id}`, base64String);
 
-            if (uploadError) throw uploadError;
+                    // 2. Update State Immediately
+                    const updatedUser = { ...user, profile_picture: base64String };
+                    setUser(updatedUser);
 
-            // Get public URL (assuming bucket is public)
-            const { data: { publicUrl } } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(filePath);
+                    // 3. If local admin, update session but WITHOUT image to save space
+                    if (user.id === 'admin-id-777') {
+                        const storageUser = { ...updatedUser };
+                        delete storageUser.profile_picture;
+                        localStorage.setItem('local_admin_session', JSON.stringify(storageUser));
+                    }
+                } catch (storageError) {
+                    if (storageError.name === 'QuotaExceededError') {
+                        alert("Brauzer xotirasi to'ldi. Iltimos, kichikroq rasm yuklang yoki boshqa rasmlarni o'chiring.");
+                    } else {
+                        throw storageError;
+                    }
+                }
+            };
+            reader.readAsDataURL(file);
 
-            // Update profile
-            const { data, error } = await supabase
-                .from('profiles')
-                .update({ profile_picture: publicUrl })
-                .eq('id', user.id)
-                .select()
-                .single();
-
-            if (error) throw error;
-            setUser({ ...user, ...data });
         } catch (error) {
-            console.error("Upload error:", error);
-            // alert('Rasm yuklashda xatolik yuz berdi. Iltimos Storage "avatars" bucketini yarating yoki sozlamalarni tekshiring.');
-            alert('Rasm yuklash uchun Supabase Storage da "avatars" nomli public bucket yaratilishi kerak.');
+            console.error("Local upload error:", error);
+            alert('Rasm saqlashda xatolik yuz berdi.');
         } finally {
             setUploading(false);
         }
@@ -173,7 +204,7 @@ const ProfilePage = () => {
                             </button>
                         )}
 
-                        <div style={{ position: 'relative', width: '140px', height: '140px', margin: '0 auto 1.5rem' }}>
+                        <div style={{ position: 'relative', width: '150px', height: '150px', margin: '0 auto 1.5rem' }}>
                             <div style={{
                                 width: '100%',
                                 height: '100%',
@@ -185,16 +216,28 @@ const ProfilePage = () => {
                                 color: 'white',
                                 fontSize: '3.5rem',
                                 fontWeight: 800,
-                                boxShadow: '0 10px 30px rgba(99, 102, 241, 0.3)',
+                                boxShadow: '0 10px 30px rgba(99, 102, 241, 0.4)',
                                 overflow: 'hidden',
-                                border: '4px solid var(--surface)'
+                                border: '4px solid var(--surface)',
+                                position: 'relative',
+                                zIndex: 1
                             }}>
                                 {user?.profile_picture ? (
-                                    <img
-                                        src={user.profile_picture && user.profile_picture.startsWith('http') ? user.profile_picture : `/img/${(user.profile_picture || '').replace('img/', '')}`}
-                                        alt="Profile"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    />
+                                    (() => {
+                                        const imgSrc = user.profile_picture && (user.profile_picture.startsWith('http') || user.profile_picture.startsWith('data:')) ? user.profile_picture : `/img/${(user.profile_picture || '').replace('img/', '')}`;
+                                        console.log('Profile Img Src:', imgSrc, 'Original:', user.profile_picture);
+                                        return (
+                                            <img
+                                                src={imgSrc}
+                                                alt="Profile"
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'cover'
+                                                }}
+                                            />
+                                        );
+                                    })()
                                 ) : (
                                     user?.first_name?.[0] || user?.username?.[0]?.toUpperCase()
                                 )}
@@ -206,6 +249,7 @@ const ProfilePage = () => {
                                 right: '5px',
                                 width: '36px',
                                 height: '36px',
+                                zIndex: 10, // Ensure it's above the image container (z-index 1)
                                 borderRadius: '50%',
                                 background: 'var(--surface-solid)',
                                 border: '1px solid var(--border-primary)',

@@ -15,7 +15,7 @@ const LoginPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const { login } = useAuth();
+    const { login, signup } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
@@ -48,9 +48,14 @@ const LoginPage = () => {
             : `${cleanUsername.replace(/\s+/g, '')}@avto.uz`;
 
         try {
-            const { success, message } = await login(emailToUse, cleanPassword);
+            const { success, message, user } = await login(emailToUse, cleanPassword);
             if (success) {
-                navigate(from, { replace: true });
+                // Check if admin
+                if (user?.is_admin || user?.is_staff || user?.user_metadata?.is_admin || user?.user_metadata?.is_staff) {
+                    navigate('/admin', { replace: true });
+                } else {
+                    navigate(from, { replace: true });
+                }
             } else {
                 setError(message || 'Login yoki parol noto\'g\'ri');
             }

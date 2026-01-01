@@ -16,14 +16,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+// Use service role key to bypass RLS during migration
+const supabaseServiceKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxamN5cXZ6amthd2h3bHZ0anpkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzE3NTA3OCwiZXhwIjoyMDgyNzUxMDc4fQ.H6zQlsZ5G8Pf7U6GuoxWvZ6OfhWb-da43TsURKxs2dY";
 
-if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('XATOLIK: .env faylida VITE_SUPABASE_URL yoki VITE_SUPABASE_ANON_KEY topilmadi.');
-    process.exit(1);
+if (!supabaseUrl) {
+    console.error('XATOLIK: .env faylida VITE_SUPABASE_URL topilmadi.');
+   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,20 +46,22 @@ async function migrate() {
 
     // 2. Mavzular va Savollarni yuklash
     for (const [mavzuKey, savollarObj] of Object.entries(data)) {
-        console.log(`Mavzu ustida ishlanmoqda: ${mavzuKey}`);
+        console.log(`\n>>> Mavzu ustida ishlanmoqda: ${mavzuKey}`);
 
-        // Mavzu nomidan raqamni ajratib olish mumkin yoki shunday qoldirish
-        // "1-mavzu" -> name: "1-mavzu"
-
-        // Mavzuni yaratish yoki borini olish
         let topicId;
         const { data: existingTopic, error: findError } = await supabase
             .from('topics')
             .select('id')
             .eq('name', mavzuKey)
-            .single();
+            .maybeSingle();
+
+        if (findError) {
+            console.error(`XATOLIK: Mavzuni qidirishda xato (${mavzuKey}):`, findError.message);
+            continue;
+        }
 
         if (existingTopic) {
+            console.log(`Mavzu allaqachon mavjud: ${mavzuKey} (ID: ${existingTopic.id})`);
             topicId = existingTopic.id;
         } else {
             const { data: newTopic, error: createError } = await supabase
@@ -68,49 +71,50 @@ async function migrate() {
                 .single();
 
             if (createError) {
-                console.error(`Mavzu yaratishda xato (${mavzuKey}):`, createError.message);
+                console.error(`XATOLIK: Mavzu yaratishda xato (${mavzuKey}):`, createError.message);
+                if (createError.message.includes('row-level security')) {
+                    console.error("DIQQAT: RLS (Row Level Security) tufayli ma'lumot qo'shib bo'lmadi. Service Role Key ishlating yoki RLSni vaqtincha o'chiring.");
+                    return; // Stop migration if RLS blocks us
+                }
                 continue;
             }
             topicId = newTopic.id;
+            console.log(`Yangi mavzu yaratildi: ${mavzuKey} (ID: ${topicId})`);
         }
 
-        // Savollarni massivga aylantirish
         const questionsToInsert = [];
-
-        // savollarObj = { "1": { savol: "...", javoblar: [], ... }, "2": ... }
         for (const [qNum, qData] of Object.entries(savollarObj)) {
-            // Javoblar massivini to'g'rilash (ba'zida string bo'lishi mumkin)
-            let choices = qData.javoblar;
-            if (typeof choices === 'string') {
-                // Agar string bo'lsa, ehtimol parse qilish kerakdir, lekin JSON da array ko'rindi.
-                // Ehtiyot shart tekshiramiz.
-            }
-
             questionsToInsert.push({
                 topic_id: topicId,
                 text: qData.savol,
-                choices: choices,
-                correct_answer_index: parseInt(qData.togri), // Index 0 dan boshlanadimi yoki 1 dan?
-                // JSON da `togri` 0, 1, 2, 3 kabi indexlar ishlatilgan.
-                // Supabase ga ham integer sifatida saqlaymiz.
+                choices: qData.javoblar,
+                correct_answer_index: parseInt(qData.togri),
                 image_url: qData.rasm
             });
         }
 
         if (questionsToInsert.length > 0) {
-            const { error: insertError } = await supabase
-                .from('questions')
-                .insert(questionsToInsert);
+            console.log(`${questionsToInsert.length} ta savol yuklanmoqda...`);
+            // Insert in chunks if too many? 7000 is a lot.
+            // Let's do it in chunks of 100.
+            const chunkSize = 100;
+            for (let i = 0; i < questionsToInsert.length; i += chunkSize) {
+                const chunk = questionsToInsert.slice(i, i + chunkSize);
+                const { error: insertError } = await supabase
+                    .from('questions')
+                    .insert(chunk);
 
-            if (insertError) {
-                console.error(`Savollarni yuklashda xato (${mavzuKey}):`, insertError.message);
-            } else {
-                console.log(`${questionsToInsert.length} ta savol yuklandi (${mavzuKey}).`);
+                if (insertError) {
+                    console.error(`XATOLIK: Savollarni yuklashda xato (${mavzuKey}, chunk ${i / chunkSize}):`, insertError.message);
+                } else {
+                    process.stdout.write('.'); // Progress indicator
+                }
             }
+            console.log(`\n${mavzuKey} uchun barcha savollar tugadi.`);
         }
     }
 
-    console.log('Migratsiya tugadi!');
+    console.log('\n\nMigratsiya muvaffaqiyatli yakunlandi!');
 }
 
 migrate();

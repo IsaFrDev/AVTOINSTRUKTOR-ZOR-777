@@ -174,10 +174,17 @@ const AdminPanel = () => {
             if (activeTab === 'users' || activeTab === 'admins') {
                 // Update profile only (cannot easily update auth user password via client without admin key)
                 // For now, allow updating profile fields like limit_date.
+
+                // VALIDATION: Password length
+                if (userForm.password && userForm.password.length < 6) {
+                    alert('Parol kamida 6 ta belgidan iborat bo\'lishi kerak!');
+                    return;
+                }
                 const payload = {
                     first_name: userForm.first_name,
                     last_name: userForm.last_name,
                     username: userForm.username,
+                    password: userForm.password, // Maxsus Auth (Custom) uchun
                     limit_date: userForm.limit_date,
                     is_admin: userForm.is_staff
                 };
@@ -225,7 +232,12 @@ const AdminPanel = () => {
             setIsModalOpen(false);
             fetchData();
         } catch (error) {
-            alert('Saqlashda xatolik yuz berdi: ' + error.message);
+            console.error('Save error details:', error);
+            if (error.code === '23505') {
+                alert('Xatolik: Bu foydalanuvchi nomi (username) allaqachon mavjud! Iltimos, boshqa nom tanlang.');
+            } else {
+                alert('Saqlashda xatolik yuz berdi: ' + (error.message || 'Noma\'lum xato'));
+            }
         }
     };
 
