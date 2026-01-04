@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -9,6 +10,7 @@ import {
 } from 'lucide-react';
 
 const LoginPage = () => {
+    const { t } = useTranslation();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -31,13 +33,13 @@ const LoginPage = () => {
         const cleanPassword = password.trim();
 
         if (cleanUsername.length < 3) {
-            setError("Login kamida 3 ta belgidan iborat bo'lishi kerak");
+            setError(t('login.error_login_short'));
             setLoading(false);
             return;
         }
 
         if (cleanPassword.length < 6) {
-            setError('Parol kamida 6 ta belgidan iborat bo\'lishi kerak');
+            setError(t('login.error_password_short'));
             setLoading(false);
             return;
         }
@@ -57,10 +59,10 @@ const LoginPage = () => {
                     navigate(from, { replace: true });
                 }
             } else {
-                setError(message || 'Login yoki parol noto\'g\'ri');
+                setError(message || t('login.error_invalid'));
             }
         } catch (err) {
-            setError('Tizimga ulanishda xatolik yuz berdi');
+            setError(t('login.error_system'));
         } finally {
             setLoading(false);
         }
@@ -146,18 +148,18 @@ const LoginPage = () => {
                         style={{ marginBottom: '2.5rem' }}
                     >
                         <div style={{
-                            width: '80px',
-                            height: '80px',
+                            width: '90px',
+                            height: '90px',
                             margin: '0 auto 1.5rem',
-                            background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
                             borderRadius: 'var(--radius-xl)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             boxShadow: '0 15px 35px rgba(99, 102, 241, 0.3)',
-                            color: 'white'
+                            background: 'white',
+                            overflow: 'hidden'
                         }}>
-                            <Car size={40} />
+                            <img src="/logo.png" alt="AVTOINSTRUKTOR ZOR 777" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </div>
                         <h1 style={{
                             fontSize: '2.25rem',
@@ -167,10 +169,10 @@ const LoginPage = () => {
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent'
                         }}>
-                            Xush Kelibsiz
+                            {t('login.welcome')}
                         </h1>
                         <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 500 }}>
-                            AVTOINSTRUKTOR ZOR 777 platformasi
+                            {t('login.platform')}
                         </p>
                     </motion.div>
 
@@ -179,7 +181,7 @@ const LoginPage = () => {
                             <User style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} size={20} />
                             <input
                                 type="text"
-                                placeholder="Login"
+                                placeholder={t('login.username')}
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 required
@@ -191,7 +193,7 @@ const LoginPage = () => {
                             <Lock style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} size={20} />
                             <input
                                 type={showPassword ? "text" : "password"}
-                                placeholder="Parol"
+                                placeholder={t('login.password')}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
@@ -256,7 +258,7 @@ const LoginPage = () => {
                         >
                             {loading ? <Loader2 className="spinner" size={24} /> : (
                                 <>
-                                    <span>Kirish</span>
+                                    <span>{t('login.login_btn')}</span>
                                     <ArrowRight size={20} />
                                 </>
                             )}
@@ -265,7 +267,7 @@ const LoginPage = () => {
 
                     <div style={{ marginTop: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--text-tertiary)', fontSize: '0.875rem', fontWeight: 600 }}>
                         <ShieldCheck size={16} />
-                        <span>Xavfsiz ulanish o'rnatildi</span>
+                        <span>{t('login.secure_connection')}</span>
                     </div>
                 </div>
 

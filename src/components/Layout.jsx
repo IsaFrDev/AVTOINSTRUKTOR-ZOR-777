@@ -1,8 +1,10 @@
 import React from 'react';
 import Navbar from './Navbar';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const Layout = ({ children }) => {
+    const { t } = useTranslation();
     return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)', transition: 'background var(--transition-base)' }}>
             <Navbar />
@@ -29,7 +31,7 @@ const Layout = ({ children }) => {
                 borderTop: '1px solid var(--border-primary)',
                 background: 'var(--bg-secondary)'
             }}>
-                © 2025 AVTOINSTRUKTOR ZOR 777. Barcha huquqlar himoyalangan.
+                © 2025 AVTOINSTRUKTOR ZOR 777. {t('common.all_rights_reserved') || 'Barcha huquqlar himoyalangan.'}
             </footer>
         </div>
     );

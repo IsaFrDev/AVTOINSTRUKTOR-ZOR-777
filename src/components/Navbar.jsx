@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { LogOut, User, Sun, Moon, LayoutDashboard, Shield, Menu, X } from 'lucide-react';
+import { LogOut, User, Sun, Moon, LayoutDashboard, Shield, Menu, X, BarChart3, HelpCircle, Settings } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
+    const { t } = useTranslation();
     const { user, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const location = useLocation();
@@ -44,42 +46,34 @@ const Navbar = () => {
                     <div style={{
                         width: '36px',
                         height: '36px',
-                        background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
                         borderRadius: 'var(--radius-md)',
+                        overflow: 'hidden',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '1rem',
-                        boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+                        boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                        background: 'white'
                     }}>
-                        🚗
+                        <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
-                    <span className="nav-logo-text" style={{
-                        fontWeight: 800,
-                        fontSize: 'clamp(0.9rem, 3vw, 1.25rem)',
-                        background: 'linear-gradient(135deg, var(--text-primary), var(--text-secondary))',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        letterSpacing: '-0.02em'
-                    }}>
-                        AVTOINSTRUKTOR
-                    </span>
                 </Link>
 
-                {/* Desktop Navigation Links */}
                 <div className="desktop-nav" style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem'
                 }}>
-                    <NavItem to="/" icon={<LayoutDashboard size={18} />} label="Dashboard" active={isActive('/')} />
-                    <NavItem to="/profile" icon={<User size={18} />} label="Profil" active={isActive('/profile')} />
+                    <NavItem to="/" icon={<LayoutDashboard size={18} />} label={t('common.dashboard')} active={isActive('/')} />
+                    <NavItem to="/stats" icon={<BarChart3 size={18} />} label={t('common.statistics')} active={isActive('/stats')} />
+                    <NavItem to="/profile" icon={<User size={18} />} label={t('common.profile')} active={isActive('/profile')} />
+                    <NavItem to="/settings" icon={<Settings size={18} />} label={t('common.settings')} active={isActive('/settings')} />
+                    <NavItem to="/faq" icon={<HelpCircle size={18} />} label={t('common.help')} active={isActive('/faq')} />
 
                     {(user.is_staff || user.is_admin) && (
                         <NavItem
                             to="/admin"
                             icon={<Shield size={18} />}
-                            label="Boshqaruv"
+                            label={t('common.admin')}
                             active={isActive('/admin')}
                             special
                         />
@@ -127,7 +121,7 @@ const Navbar = () => {
                         className="logout-btn"
                     >
                         <LogOut size={16} />
-                        <span className="hide-mobile">Chiqish</span>
+                        <span className="hide-mobile">{t('common.logout')}</span>
                     </button>
                 </div>
 
@@ -197,21 +191,30 @@ const Navbar = () => {
                         }}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                            <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>Menyu</span>
+                            <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>{t('common.menu') || 'Menyu'}</span>
                             <button onClick={closeMenu} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)' }}>
                                 <X size={24} />
                             </button>
                         </div>
 
                         <Link to="/" onClick={closeMenu} style={mobileNavItemStyle(isActive('/'))}>
-                            <LayoutDashboard size={20} /> Dashboard
+                            <LayoutDashboard size={20} /> {t('common.dashboard')}
+                        </Link>
+                        <Link to="/stats" onClick={closeMenu} style={mobileNavItemStyle(isActive('/stats'))}>
+                            <BarChart3 size={20} /> {t('common.statistics')}
                         </Link>
                         <Link to="/profile" onClick={closeMenu} style={mobileNavItemStyle(isActive('/profile'))}>
-                            <User size={20} /> Profil
+                            <User size={20} /> {t('common.profile')}
                         </Link>
-                        {(user.is_staff || user.is_admin) && (
+                        <Link to="/settings" onClick={closeMenu} style={mobileNavItemStyle(isActive('/settings'))}>
+                            <Settings size={20} /> {t('common.settings')}
+                        </Link>
+                        <Link to="/faq" onClick={closeMenu} style={mobileNavItemStyle(isActive('/faq'))}>
+                            <HelpCircle size={20} /> {t('common.help')}
+                        </Link>
+                        {user && (user.is_staff || user.is_admin) && (
                             <Link to="/admin" onClick={closeMenu} style={mobileNavItemStyle(isActive('/admin'))}>
-                                <Shield size={20} /> Boshqaruv
+                                <Shield size={20} /> {t('common.admin')}
                             </Link>
                         )}
 
@@ -233,7 +236,7 @@ const Navbar = () => {
                                 }}
                             >
                                 {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-                                {theme === 'dark' ? 'Yorug\' rejim' : 'Qorong\'u rejim'}
+                                {theme === 'dark' ? t('common.light_mode') || 'Yorug\' rejim' : t('common.dark_mode') || 'Qorong\'u rejim'}
                             </button>
 
                             <button
@@ -252,7 +255,7 @@ const Navbar = () => {
                                     gap: '0.5rem'
                                 }}
                             >
-                                <LogOut size={20} /> Chiqish
+                                <LogOut size={20} /> {t('common.logout')}
                             </button>
                         </div>
                     </motion.div>

@@ -1,0 +1,79 @@
+.level-badge-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-radius: var(--radius-xl);
+    transition: all var(--transition-base);
+}
+
+.level-badge-wrapper.with-details {
+    padding: 1.25rem;
+}
+
+.level-badge-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.level-badge-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.next-level-target {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.next-level-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+}
+
+.level-stats-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+@media (max-width: 540px) {
+    .level-badge-wrapper.with-details {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .level-badge-header {
+        justify-content: center;
+    }
+
+    .next-level-label-row {
+        justify-content: center;
+    }
+
+    .level-stats-row {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 380px) {
+
+    .level-badge-header,
+    .next-level-label-row {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}

@@ -1,50 +1,155 @@
-import axios from 'axios';
+import { supabase } from '../supabase';
 
-const API_BASE_URL = 'http://localhost:8000';
+// Quiz API functions using Supabase
+export const quizApi = {
+    // Barcha mavzularni olish
+    getTopics: async () => {
+        const { data, error } = await supabase
+            .from('topics')
+            .select('*, questions(id)')
+            .order('id');
 
-const api = axios.create({
-    baseURL: `${API_BASE_URL}/api`,
-});
-
-export { API_BASE_URL };
-
-// Add a request interceptor to add the auth token to every request
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
+        if (error) throw error;
+        // Map to match the expected format { id, title, order, questions_count }
+        return data.map(t => ({
+            ...t,
+            title: t.name,
+            questions_count: t.questions?.length || 0
+        }));
     },
-    (error) => Promise.reject(error)
-);
 
-// Add a response interceptor to handle token expiration
-api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
-            const refreshToken = localStorage.getItem('refresh_token');
-            if (refreshToken) {
-                try {
-                    const response = await axios.post('http://localhost:8000/api/token/refresh/', {
-                        refresh: refreshToken,
-                    });
-                    localStorage.setItem('access_token', response.data.access);
-                    api.defaults.headers.common['Authorization'] = `Bearer ${response.data.access}`;
-                    return api(originalRequest);
-                } catch (refreshError) {
-                    // If refresh token is also invalid, logout
-                    localStorage.clear();
-                    window.location.href = '/login';
-                }
-            }
+    // Bitta mavzu haqida ma'lumot (savollar bilan birga)
+    getTopic: async (topicId) => {
+        const { data, error } = await supabase
+            .from('topics')
+            .select('*, questions(*)')
+            .eq('id', topicId)
+            .single();
+
+        if (error) throw error;
+        return {
+            ...data,
+            title: data.name,
+            questions_count: data.questions?.length || 0
+        };
+    },
+
+    // Mavzu bo'yicha savollar
+    getTopicQuestions: async (topicId) => {
+        const { data, error } = await supabase
+            .from('questions')
+            .select('*')
+            .eq('topic_id', topicId);
+
+        if (error) throw error;
+        return data;
+    },
+
+    // Mavzu bo'yicha quiz (20 ta aralashtrilgan savol)
+    getTopicQuiz: async (topicId) => {
+        const { data, error } = await supabase
+            .from('questions')
+            .select('*')
+            .eq('topic_id', topicId);
+
+        if (error) throw error;
+
+        // Shuffle and limit to 20
+        const shuffled = [...data].sort(() => 0.5 - Math.random());
+        return {
+            questions: shuffled.slice(0, 20).map(q => ({
+                ...q,
+                question_text: q.text // Frontend expects question_text
+            }))
+        };
+    },
+
+    // Barcha savollar
+    getQuestions: async () => {
+        const { data, error } = await supabase
+            .from('questions')
+            .select('*');
+
+        if (error) throw error;
+        return data.map(q => ({
+            ...q,
+            question_text: q.text
+        }));
+    },
+
+    // Bitta savol
+    getQuestion: async (questionId) => {
+        const { data, error } = await supabase
+            .from('questions')
+            .select('*')
+            .eq('id', questionId)
+            .single();
+
+        if (error) throw error;
+        return {
+            ...data,
+            question_text: data.text
+        };
+    },
+
+    // Imtihon rejimi (barcha mavzulardan aralash 20 ta)
+    getExamQuestions: async () => {
+        const { data, error } = await supabase
+            .from('questions')
+            .select('*');
+
+        if (error) throw error;
+
+        const shuffled = [...data].sort(() => 0.5 - Math.random());
+        return {
+            questions: shuffled.slice(0, 20).map(q => ({
+                ...q,
+                question_text: q.text
+            }))
+        };
+    },
+
+    // Random savollar
+    getRandomQuestions: async (count = 10) => {
+        const { data, error } = await supabase
+            .from('questions')
+            .select('*');
+
+        if (error) throw error;
+
+        const shuffled = [...data].sort(() => 0.5 - Math.random());
+        return {
+            questions: shuffled.slice(0, count).map(q => ({
+                ...q,
+                question_text: q.text
+            }))
+        };
+    },
+
+    // Topic bo'yicha savollar (query params bilan)
+    getQuestionsByTopic: async (topicId, limit = 20, shuffle = true) => {
+        let query = supabase
+            .from('questions')
+            .select('*')
+            .eq('topic_id', topicId);
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        let result = data;
+        if (shuffle) {
+            result = [...data].sort(() => 0.5 - Math.random());
         }
-        return Promise.reject(error);
-    }
-);
 
+        return result.slice(0, limit);
+    }
+};
+
+export const API_BASE_URL = '';
+const api = {
+    get: () => Promise.resolve({ data: [] }),
+    post: () => Promise.resolve({ data: {} }),
+    put: () => Promise.resolve({ data: {} }),
+    delete: () => Promise.resolve({ data: {} }),
+};
 export default api;

@@ -1,0 +1,308 @@
+{
+    "common": {
+        "menu": "Menyu",
+        "dashboard": "Dashboard",
+        "statistics": "Statistika",
+        "profile": "Profil",
+        "settings": "Sozlamalar",
+        "help": "Yordam",
+        "admin": "Boshqaruv",
+        "logout": "Chiqish",
+        "back": "Orqaga",
+        "save": "Saqlash",
+        "cancel": "Bekor qilish",
+        "loading": "Yuklanmoqda...",
+        "active": "Faol",
+        "offline": "Oflayn",
+        "uzbek": "O'zbekcha",
+        "russian": "Русский",
+        "english": "English",
+        "reset": "Tozalash",
+        "dark_mode": "Tungi mavzu",
+        "light_mode": "Kunduzgi mavzu",
+        "all_rights_reserved": "Barcha huquqlar himoyalangan."
+    },
+    "dashboard": {
+        "title": "AVTOINSTRUKTOR ZOR 777",
+        "welcome": "Salom, {{name}}! 👋",
+        "subtitle": "Haydovchilik guvohnomasi imtihoniga tayyorgarlik",
+        "select_topic": "Mashq qilish uchun mavzuni tanlang.",
+        "start_practice": "Mashq boshlash",
+        "practice_desc": "Mavzular bo'yicha ketma-ket o'rganish va test ishlash.",
+        "start_exam": "Imtihon boshlash",
+        "exam_desc": "Barcha mavzulardan tasodifiy savollar. Maksimal darajada sinov!",
+        "stat_topics": "Mavzular",
+        "stat_questions": "Savollar",
+        "stat_completed": "Tugallangan",
+        "stat_avg_time": "O'rtacha vaqt",
+        "topics_title": "Mavzular bo'yicha testlar",
+        "search_placeholder": "Mavzularni qidirish...",
+        "no_topics": "Mavzular topilmadi",
+        "topics_count": "{{count}} ta mavzu",
+        "topic_progress": "Natija: {{percent}}%",
+        "questions_count": "{{count}} ta savol",
+        "variants_count": "{{count}} ta variant",
+        "start_quiz": "Testni boshlash"
+    },
+    "settings": {
+        "title": "Sozlamalar",
+        "subtitle": "Ilovani o'zingizga moslashtiring va imkoniyatlarni boshqaring",
+        "visual_section": "Ko'rinish va Dizayn",
+        "dark_mode": "Tungi mavzu",
+        "theme_desc": "Ko'zlaringizni charchatmaslik uchun qorong'u rejimdan foydalanyapsiz.",
+        "font_size": "Matn o'lchami",
+        "language_section": "Til va Hudud",
+        "language_desc": "Ilova tilini tanlang",
+        "pwa_section": "Ilova Imkoniyatlari (PWA)",
+        "pwa_installed": "Ilova o'rnatilgan",
+        "pwa_install_title": "Asosiy ekranga qo'shish",
+        "pwa_installed_desc": "Siz allaqachon AVTOINSTRUKTOR ilovasidan foydalanyapsiz. Oflayn rejim va tezkor kirish faol.",
+        "pwa_install_desc": "AVTOINSTRUKTOR ilovasini o'rnating va internet bo'lmaganda ham test yechish imkoniyatiga ega bo'ling.",
+        "install_btn": "O'rnatish",
+        "security_section": "Xavfsizlik va Ma'lumotlar",
+        "reset_stats": "Statistikani tozalash",
+        "reset_desc": "Barcha ballar va natijalar nolga tushiriladi",
+        "reset_btn": "Reset",
+        "reset_confirm_title": "Aniqmi?",
+        "reset_confirm_desc": "Barcha erishgan natijalaringiz, ballaringiz va darajangiz butunlay o'chib ketadi. Bu amalni qaytarib bo'lmaydi.",
+        "reset_success": "Statistika tozalandi",
+        "pwa_manual_install": "Sizning brauzeringizda avtomatik o'rnatish imkoniyati mavjud emas. Iltimos, brauzer menyusidan 'Asosiy ekranga qo'shish' tugmasidan foydalaning.",
+        "pwa_ios_install_hint": "iPhone/iPad da: 'Ulashish' (Share) tugmasini bosing va 'Asosiy ekranga qo'shish' (Add to Home Screen) ni tanlang."
+    },
+    "profile": {
+        "title": "Mening Profilim",
+        "subtitle": "Shaxsiy ma'lumotlaringiz va natijalaringiz",
+        "edit_profile": "Profilni tahrirlash",
+        "username": "Foydalanuvchi nomi",
+        "first_name": "Ism",
+        "last_name": "Familiya",
+        "user": "Foydalanuvchi",
+        "administrator": "Administrator",
+        "topics_count": "Mavzular",
+        "remaining_days": "Kun qoldi",
+        "details_title": "Batafsil ma'lumotlar",
+        "registration_date": "Ro'yxatdan o'tilgan",
+        "expiry_date": "Ruxsat muddati",
+        "completed_topics": "Tugatilgan mavzular",
+        "admin_contact": "Shaxsiy ma'lumotlaringizni o'zgartirishingiz mumkin. Login va amal qilish muddatini o'zgartirish uchun administratorga murojaat qiling.",
+        "success_update": "Profil muvaffaqiyatli yangilandi",
+        "not_available": "Mavjud emas",
+        "error_system": "Tizimda xatolik yuz berdi. Iltimos qaytadan urunib ko'ring.",
+        "image_too_large": "Rasm hajmi juda katta. Iltimos 10MB dan kichik rasm yuklang. (LocalStorage cheklovi)",
+        "quota_exceeded": "Brauzer xotirasi to'ldi. Iltimos, kichikroq rasm yuklang yoki boshqa ma'lumotlarni o'chiring.",
+        "save_error": "Rasmni saqlashda xatolik yuz berdi."
+    },
+    "quiz": {
+        "loading": "Savollar tayyorlanmoqda...",
+        "not_found": "Ushbu bo'limda savollar mavjud emas",
+        "select_other": "Boshqa bo'limni tanlash",
+        "exam": "Imtihon",
+        "practice": "Mashq",
+        "congrats": "Tabriklaymiz!",
+        "failed": "Natija yetarli emas",
+        "pass_msg": "Siz imtihondan muvaffaqiyatli o'tdingiz.",
+        "fail_msg": "Yana bir bor urinib ko'ring.",
+        "stat_total": "Jami savollar",
+        "stat_correct": "To'g'ri javoblar",
+        "stat_wrong": "Xato javoblar",
+        "stat_percent": "Foiz",
+        "retry": "Qayta topshirish",
+        "back_dashboard": "Dashboardga qaytish",
+        "finish": "Yakunlash",
+        "next": "Keyingisi",
+        "prev": "Ortga",
+        "correct_msg": "To'g'ri javob! 🎉",
+        "wrong_msg": "Noto'g'ri. To'g'ri javob: {{choice}}",
+        "logout_confirm": "Chiqishni tasdiqlang",
+        "logout_msg": "Haqiqatan ham tizimdan chiqmoqchimisiz?",
+        "process": "Jarayon",
+        "answered": "{{count}} / {{total}} javob berildi",
+        "current_question_label": "Hozirgi savol",
+        "questions_count_suffix": "{{count}} savol",
+        "ball": "ball",
+        "next_level_label": "Keyingi daraja:",
+        "ball_left": "{{points}} ball qoldi",
+        "streak": "streak",
+        "best": "best"
+    },
+    "levels": {
+        "beginner": "Boshlang'ich",
+        "learner": "O'rganuvchi",
+        "intermediate": "O'rta daraja",
+        "advanced": "Yuqori daraja",
+        "expert": "Mutaxassis",
+        "master": "Ustoz"
+    },
+    "pwa": {
+        "title": "AVTOINSTRUKTOR ZOR 777",
+        "msg": "Mashqlarni tezkor va qulay yechish uchun ilovani asosiy ekranga qo'shing."
+    },
+    "stats": {
+        "title": "Statistikalar",
+        "subtitle": "Sizning o'quv natijalari va yutuqlaringiz",
+        "total_questions": "Jami savollar",
+        "correct_answers": "To'g'ri javoblar",
+        "wrong_answers": "Noto'g'ri javoblar",
+        "accuracy": "Aniqlik",
+        "current_streak": "Joriy streak",
+        "best_streak": "Eng yaxshi streak",
+        "results": "Natijalar",
+        "total_time": "Umumiy vaqt",
+        "current_level": "Joriy daraja",
+        "levels": "Darajalar",
+        "reset_stats": "Statistikani tozalash",
+        "reset_confirm_title": "Haqiqatan ham tozalashni xohlaysizmi?",
+        "reset_confirm_msg": "Barcha statistika, ballar va darajalar o'chib ketadi.",
+        "reset_clean_btn": "Tozalash",
+        "reset_confirm_title_short": "O'chirishni tasdiqlang",
+        "points": "ball",
+        "seconds": "soniya",
+        "minutes": "daqiqa"
+    },
+    "faq": {
+        "title": "Yordam va FAQ",
+        "subtitle": "Ko'p so'raladigan savollar va javoblar",
+        "contact_title": "Savolingiz bormi?",
+        "contact_text": "Agar javob topa olmasangiz, biz bilan bog'laning",
+        "contact_btn": "Qobiljona",
+        "categories": {
+            "basic": "Asosiy savollar",
+            "points": "Ball va darajalar",
+            "settings": "Sozlamalar",
+            "exam_prep": "Imtihonga tayyorgarlik"
+        },
+        "items": {
+            "basic": [
+                {
+                    "q": "Dastur qanday ishlaydi?",
+                    "a": "Bu dastur avtomobil haydash nazariy imtihoniga tayyorlanish uchun mo'ljallangan. Siz mavzularni tanlaysiz, savollarni javob berasiz va natijalaringizni kuzatib borasiz. Har bir to'g'ri javob uchun ball olasiz va darajangiz oshadi."
+                },
+                {
+                    "q": "Qanday qilib boshlash mumkin?",
+                    "a": "1. Bosh sahifada mavzulardan birini tanlang\n2. 'Testni boshlash' tugmasini bosing\n3. Savollarni diqqat bilan o'qing va javob bering\n4. Natijangizni ko'ring va xatolaringizni tahlil qiling"
+                },
+                {
+                    "q": "Dastur bepulmi?",
+                    "a": "Ha, dasturning barcha asosiy funksiyalari bepul. Siz cheksiz miqdorda test yechishingiz mumkin."
+                }
+            ],
+            "points": [
+                {
+                    "q": "Ball tizimi qanday ishlaydi?",
+                    "a": "Har bir to'g'ri javob uchun 5 ball olasiz. Noto'g'ri javob uchun ball berilmaydi, lekin streak (ketma-ket to'g'ri javoblar) tugaydi."
+                },
+                {
+                    "q": "Qanday darajalar bor?",
+                    "a": "6 ta daraja mavjud:\n🌱 Boshlang'ich (0-50 ball)\n📚 O'rganuvchi (51-150 ball)\n⭐ O'rta daraja (151-300 ball)\n🏆 Yuqori daraja (301-500 ball)\n🔥 Mutaxassis (501-1000 ball)\n💎 Ustoz (1001+ ball)"
+                },
+                {
+                    "q": "Streak nima?",
+                    "a": "Streak - bu ketma-ket to'g'ri javoblar soni. Qancha ko'p streak yig'sangiz, shuncha yaxshi. Eng yuqori streak ko'rsatkichingiz saqlanadi."
+                }
+            ],
+            "settings": [
+                {
+                    "q": "Temani qanday o'zgartirish mumkin?",
+                    "a": "Yuqori o'ng burchakdagi quyosh/oy ikonkasini bosing. Yoritilgan (light) va qorong'u (dark) tema o'rtasida almashishingiz mumkin."
+                },
+                {
+                    "q": "Ma'lumotlarim qayerda saqlanadi?",
+                    "a": "Barcha ma'lumotlaringiz (statistika, sozlamalar) brauzeringizning localStorage'ida saqlanadi. Bu degani, siz brauzer ma'lumotlarini tozalamasangiz, statistikangiz saqlanib qoladi."
+                }
+            ],
+            "exam_prep": [
+                {
+                    "q": "Imtihonga qanday tayyorlanish kerak?",
+                    "a": "1. Har kuni kamida 1-2 soat mashq qiling\n2. Barcha mavzularni ketma-ket o'rganing\n3. Xatolaringizni tahlil qiling va qayta ishlang\n4. Imtihon oldidan umumiy test yeching"
+                },
+                {
+                    "q": "Eng qiyin mavzular qaysilar?",
+                    "a": "Odatda 'Yo'l belgilari', 'Chorrahalardan o'tish tartibi' va 'Birinchi yordam' mavzulari eng ko'p xato qilinadigan mavzular hisoblanadi. Bu mavzularga ko'proq e'tibor bering."
+                },
+                {
+                    "q": "Imtihonda nechta savol bo'ladi?",
+                    "a": "Haqiqiy imtihonda odatda 20-30 ta savol bo'ladi. Vaqt chegarasi ham mavjud, shuning uchun tez va aniq javob berishga o'rganing."
+                }
+            ]
+        }
+    },
+    "login": {
+        "welcome": "Xush Kelibsiz",
+        "platform": "AVTOINSTRUKTOR ZOR 777 platformasi",
+        "username": "Login",
+        "password": "Parol",
+        "login_btn": "Kirish",
+        "secure_connection": "Xavfsiz ulanish o'rnatildi",
+        "error_login_short": "Login kamida 3 ta belgidan iborat bo'lishi kerak",
+        "error_password_short": "Parol kamida 6 ta belgidan iborat bo'lishi kerak",
+        "error_invalid": "Login yoki parol noto'g'ri",
+        "error_system": "Tizimga ulanishda xatolik yuz berdi"
+    },
+    "admin": {
+        "title": "Boshqaruv markazi",
+        "users_tab_desc": "Akkountlar va ruxsatlarni boshqarish",
+        "questions_tab_desc": "Test savollari bazasini tahrirlash",
+        "topics_tab_desc": "Mavzular bazasini tahrirlash",
+        "admins_tab_desc": "Tizim administratorlari ro'yxati",
+        "add_user": "Qo'shish",
+        "add_question": "Yangi savol",
+        "add_topic": "Yangi mavzu",
+        "tabs": {
+            "users": "Foydalanuvchilar",
+            "questions": "Savollar",
+            "topics": "Mavzular",
+            "statistics": "Statistika",
+            "admins": "Adminlar"
+        },
+        "search": "Qidirish...",
+        "table": {
+            "profile": "Profil",
+            "login": "Login",
+            "password": "Parol",
+            "expiry": "Ruxsat muddati",
+            "status": "Status",
+            "actions": "Amallar",
+            "question_text": "Savol matni",
+            "topic": "Mavzu",
+            "image": "Rasm",
+            "topic_name": "Mavzu nomi",
+            "description": "Tavsif",
+            "questions_count": "Savollar"
+        },
+        "status": {
+            "active": "Faol",
+            "expired": "Muddati o'tgan"
+        },
+        "modal": {
+            "edit": "Tahrirlash",
+            "add": "Yangi qo'shish",
+            "first_name": "Ism",
+            "last_name": "Familiya",
+            "admin_role": "Administrator",
+            "correct_answer": "To'g'ri javob",
+            "image_url": "Rasm manzili",
+            "password_hint": "O'zgartirmaslik uchun bo'sh qoldiring"
+        },
+        "delete": {
+            "title": "O'chirishni tasdiqlang",
+            "msg": "Haqiqatan ham ushbu ma'lumotni o'chirib yubormoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi."
+        },
+        "stats_view": {
+            "user_status_title": "Foydalanuvchilar statusi",
+            "active_label": "Faol",
+            "expired_label": "Muddati tugagan",
+            "overall_title": "Umumiy statistika",
+            "total_users": "Jami foydalanuvchilar",
+            "total_questions": "Jami savollar",
+            "total_topics": "Jami mavzular",
+            "chart_title": "Mavzular bo'yicha savollar taqsimoti",
+            "questions_count": "Savollar soni"
+        },
+        "success": {
+            "added": "Foydalanuvchi qo'shildi!",
+            "copy_hint": "Ustiga bosib nusxa oling",
+            "copied": "Nusxa olindi!",
+            "copy_btn": "Nusxa olish"
+        }
+    }
+}

@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { User as UserIcon, Calendar, BookOpen, Clock, ChevronLeft, Shield, Edit3, Check, X, Save } from 'lucide-react';
+import { User as UserIcon, Calendar, BookOpen, Clock, ChevronLeft, Shield, Edit3, Check, X, Save, Settings, Type, Globe } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
+import { useProgress } from '../context/ProgressContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../supabase';
-// API no longer needed except perhaps BASE_URL for images if stored externally, 
-// but we will use Supabase Storage for images later.
-// import api, { API_BASE_URL } from '../services/api';
+import LevelBadge from '../components/LevelBadge';
+import './ProfilePage.css';
 
 const ProfilePage = () => {
+    const { t, i18n } = useTranslation();
     const { user, setUser } = useAuth();
+    const { fontSize, setFontSize } = useSettings();
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
@@ -20,7 +24,7 @@ const ProfilePage = () => {
     const [uploading, setUploading] = useState(false);
 
     const formatDate = (dateString) => {
-        if (!dateString) return 'Mavjud emas';
+        if (!dateString) return t('profile.not_available') || 'Mavjud emas';
         const date = new Date(dateString);
         return date.toLocaleDateString('uz-UZ', {
             year: 'numeric',
@@ -40,22 +44,17 @@ const ProfilePage = () => {
     const handleSave = async () => {
         setLoading(true);
         try {
-            // Check if this is the local admin
             if (user.id === 'admin-id-777') {
                 const updatedUser = { ...user, ...formData };
-
-                // Create a clean copy for storage WITHOUT the profile picture (it's stored separately)
                 const storageUser = { ...updatedUser };
                 delete storageUser.profile_picture;
-
                 localStorage.setItem('local_admin_session', JSON.stringify(storageUser));
                 setUser(updatedUser);
                 setIsEditing(false);
-                alert("Profil muvaffaqiyatli yangilandi (Local Admin)");
+                alert(t('profile.success_update') || "Profil muvaffaqiyatli yangilandi");
                 return;
             }
 
-            // Regular Supabase user
             const { data, error } = await supabase
                 .from('profiles')
                 .update(formData)
@@ -65,7 +64,6 @@ const ProfilePage = () => {
 
             if (error) throw error;
 
-            // Preserve the local profile picture if it exists
             const localPic = localStorage.getItem(`profile_picture_${user.id}`);
             const updatedUser = { ...user, ...data };
             if (localPic) {
@@ -76,7 +74,7 @@ const ProfilePage = () => {
             setIsEditing(false);
         } catch (error) {
             console.error(error);
-            alert('Tizimda xatolik yuz berdi. Iltimos qaytadan urunib ko\'ring.');
+            alert(t('profile.error_system') || 'Tizimda xatolik yuz berdi. Iltimos qaytadan urunib ko\'ring.');
         } finally {
             setLoading(false);
         }
@@ -86,28 +84,22 @@ const ProfilePage = () => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Validatsiya (o'lcham): 10MB limit (User request, though localStorage might fail)
         if (file.size > 10 * 1024 * 1024) {
-            alert("Rasm hajmi juda katta. Iltimos 10MB dan kichik rasm yuklang. (LocalStorage cheklovi)");
+            alert(t('profile.image_too_large') || "Rasm hajmi juda katta. Iltimos 10MB dan kichik rasm yuklang.");
             return;
         }
 
         setUploading(true);
         try {
-            // Convert to Base64
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64String = reader.result;
 
                 try {
-                    // 1. Save to separate localStorage key
                     localStorage.setItem(`profile_picture_${user.id}`, base64String);
-
-                    // 2. Update State Immediately
                     const updatedUser = { ...user, profile_picture: base64String };
                     setUser(updatedUser);
 
-                    // 3. If local admin, update session but WITHOUT image to save space
                     if (user.id === 'admin-id-777') {
                         const storageUser = { ...updatedUser };
                         delete storageUser.profile_picture;
@@ -115,7 +107,7 @@ const ProfilePage = () => {
                     }
                 } catch (storageError) {
                     if (storageError.name === 'QuotaExceededError') {
-                        alert("Brauzer xotirasi to'ldi. Iltimos, kichikroq rasm yuklang yoki boshqa rasmlarni o'chiring.");
+                        alert(t('profile.quota_exceeded') || "Brauzer xotirasi to'ldi. Iltimos, kichikroq rasm yuklang.");
                     } else {
                         throw storageError;
                     }
@@ -125,28 +117,26 @@ const ProfilePage = () => {
 
         } catch (error) {
             console.error("Local upload error:", error);
-            alert('Rasm saqlashda xatolik yuz berdi.');
+            alert(t('profile.save_error') || 'Rasm saqlashda xatolik yuz berdi.');
         } finally {
             setUploading(false);
         }
     };
 
     return (
-        <div className="profile-page fade-in">
+        <div className="profile-page fade-in responsive-container">
             <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
-                        <h1 style={{
-                            fontSize: '2.5rem',
-                            fontWeight: 800,
+                        <h1 className="text-responsive-h1" style={{
                             background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             letterSpacing: '-0.03em'
                         }}>
-                            Mening Profilim
+                            {t('profile.title')}
                         </h1>
-                        <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Shaxsiy ma'lumotlaringiz va natijalaringiz</p>
+                        <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem' }}>{t('profile.subtitle')}</p>
                     </div>
                     <button
                         onClick={() => navigate('/')}
@@ -165,25 +155,16 @@ const ProfilePage = () => {
                         }}
                         className="hover-scale"
                     >
-                        <ChevronLeft size={20} /> Orqaga
+                        <ChevronLeft size={20} /> {t('common.back')}
                     </button>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
                     {/* User Info Card */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        style={{
-                            background: 'var(--surface)',
-                            borderRadius: 'var(--radius-xl)',
-                            padding: '3rem',
-                            border: '1px solid var(--border-primary)',
-                            boxShadow: 'var(--shadow-xl)',
-                            textAlign: 'center',
-                            backdropFilter: 'blur(10px)',
-                            position: 'relative'
-                        }}
+                        className="profile-card"
                     >
                         {!isEditing && (
                             <button
@@ -204,28 +185,11 @@ const ProfilePage = () => {
                             </button>
                         )}
 
-                        <div style={{ position: 'relative', width: '150px', height: '150px', margin: '0 auto 1.5rem' }}>
-                            <div style={{
-                                width: '100%',
-                                height: '100%',
-                                borderRadius: '50%',
-                                background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white',
-                                fontSize: '3.5rem',
-                                fontWeight: 800,
-                                boxShadow: '0 10px 30px rgba(99, 102, 241, 0.4)',
-                                overflow: 'hidden',
-                                border: '4px solid var(--surface)',
-                                position: 'relative',
-                                zIndex: 1
-                            }}>
+                        <div className="profile-avatar-container">
+                            <div className="profile-avatar">
                                 {user?.profile_picture ? (
                                     (() => {
                                         const imgSrc = user.profile_picture && (user.profile_picture.startsWith('http') || user.profile_picture.startsWith('data:')) ? user.profile_picture : `/img/${(user.profile_picture || '').replace('img/', '')}`;
-                                        console.log('Profile Img Src:', imgSrc, 'Original:', user.profile_picture);
                                         return (
                                             <img
                                                 src={imgSrc}
@@ -249,7 +213,7 @@ const ProfilePage = () => {
                                 right: '5px',
                                 width: '36px',
                                 height: '36px',
-                                zIndex: 10, // Ensure it's above the image container (z-index 1)
+                                zIndex: 10,
                                 borderRadius: '50%',
                                 background: 'var(--surface-solid)',
                                 border: '1px solid var(--border-primary)',
@@ -277,21 +241,21 @@ const ProfilePage = () => {
                                 >
                                     <input
                                         type="text"
-                                        placeholder="Ism"
+                                        placeholder={t('profile.first_name') || "Ism"}
                                         value={formData.first_name}
                                         onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                                         style={inputStyle}
                                     />
                                     <input
                                         type="text"
-                                        placeholder="Familiya"
+                                        placeholder={t('profile.last_name') || "Familiya"}
                                         value={formData.last_name}
                                         onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                                         style={inputStyle}
                                     />
                                     <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                                         <button onClick={handleSave} disabled={loading} style={saveButtonStyle}>
-                                            <Save size={18} /> Saqlash
+                                            <Save size={18} /> {t('common.save')}
                                         </button>
                                         <button onClick={() => setIsEditing(false)} style={cancelButtonStyle}>
                                             <X size={18} />
@@ -318,27 +282,32 @@ const ProfilePage = () => {
                                         fontSize: '0.875rem',
                                         fontWeight: 600,
                                         color: 'var(--text-secondary)',
-                                        marginBottom: '2rem'
+                                        marginBottom: '1.5rem'
                                     }}>
                                         {user?.is_staff ? <Shield size={16} /> : <UserIcon size={16} />}
-                                        {user?.is_staff ? 'Administrator' : 'Foydalanuvchi'}
+                                        {user?.is_staff ? t('profile.administrator') : t('profile.user')}
                                     </div>
                                 </motion.div>
                             )}
                         </AnimatePresence>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                        {/* Level Badge */}
+                        <div style={{ marginBottom: '2rem' }}>
+                            <LevelBadge showDetails={true} size="large" />
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <div style={{ background: 'var(--bg-secondary)', padding: '1.25rem', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-primary)' }}>
                                 <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--primary)' }}>
                                     {user?.completed_mavzular?.length || 0}
                                 </div>
-                                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mavzular</div>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('profile.topics_count')}</div>
                             </div>
                             <div style={{ background: 'var(--bg-secondary)', padding: '1.25rem', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-primary)' }}>
                                 <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--warning)' }}>
                                     {remainingDays}
                                 </div>
-                                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kun qoldi</div>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('profile.remaining_days')}</div>
                             </div>
                         </div>
                     </motion.div>
@@ -347,41 +316,34 @@ const ProfilePage = () => {
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        style={{
-                            background: 'var(--surface)',
-                            borderRadius: 'var(--radius-xl)',
-                            padding: '3rem',
-                            border: '1px solid var(--border-primary)',
-                            boxShadow: 'var(--shadow-xl)',
-                            backdropFilter: 'blur(10px)'
-                        }}
+                        className="profile-details-card"
                     >
                         <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem', borderBottom: '1px solid var(--border-primary)', paddingBottom: '1rem' }}>
-                            Batafsil ma'lumotlar
+                            {t('profile.details_title')}
                         </h3>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             <DetailItem
                                 icon={<UserIcon size={20} />}
-                                label="Login"
+                                label={t('profile.username')}
                                 value={user?.username}
                             />
                             <DetailItem
                                 icon={<Calendar size={20} />}
-                                label="Ro'yxatdan o'tilgan"
+                                label={t('profile.registration_date')}
                                 value={formatDate(user?.date_joined)}
                             />
                             <DetailItem
                                 icon={<Clock size={20} />}
-                                label="Ruxsat muddati"
+                                label={t('profile.expiry_date')}
                                 value={formatDate(user?.limit_date)}
-                                subValue={remainingDays > 0 ? `(${remainingDays} kun qoldi)` : '(Muddati tugagan)'}
+                                subValue={remainingDays > 0 ? `(${remainingDays} ${t('profile.remaining_days')})` : `(${t('common.offline')})`}
                                 color={remainingDays > 0 ? 'var(--success)' : 'var(--error)'}
                             />
                             <DetailItem
                                 icon={<BookOpen size={20} />}
-                                label="Tugatilgan mavzular"
-                                value={`${user?.completed_mavzular?.length || 0} ta`}
+                                label={t('profile.completed_topics')}
+                                value={t('dashboard.questions_count', { count: user?.completed_mavzular?.length || 0 })}
                             />
                         </div>
 
@@ -397,10 +359,11 @@ const ProfilePage = () => {
                         }}>
                             <Shield size={24} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                                Shaxsiy ma'lumotlaringizni o'zgartirishingiz mumkin. Username va ruxsat muddatini o'zgartirish uchun administratorga murojaat qiling.
+                                {t('profile.admin_contact')}
                             </p>
                         </div>
                     </motion.div>
+
                 </div>
             </div>
         </div>
@@ -417,13 +380,14 @@ const DetailItem = ({ icon, label, value, subValue, color }) => (
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--text-tertiary)'
+            color: 'var(--text-tertiary)',
+            flexShrink: 0
         }}>
             {icon}
         </div>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</div>
-            <div style={{ fontSize: '1.125rem', fontWeight: 700, color: color || 'var(--text-primary)' }}>
+            <div style={{ fontSize: '1.125rem', fontWeight: 700, color: color || 'var(--text-primary)', wordBreak: 'break-word' }}>
                 {value} <span style={{ fontSize: '0.875rem', fontWeight: 500, opacity: 0.7 }}>{subValue}</span>
             </div>
         </div>
