@@ -190,17 +190,6 @@ const QuizPage = () => {
 
     const handleAnswer = (choiceIdx) => {
         if (showResults) return;
-
-        // Imtihon rejimida oddiy tanlov
-        if (mode === 'exam') {
-            const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
-            setQuestionTimes(prev => ({ ...prev, [currentIdx]: (prev[currentIdx] || 0) + timeSpent }));
-            setQuestionStartTime(Date.now()); // Reset for potential same-question interaction
-            setUserAnswers({ ...userAnswers, [currentIdx]: choiceIdx });
-            return;
-        }
-
-        // Mashq rejimida - javob ko'rsatish va keyingi savolga o'tish
         if (answered) return;
 
         setSelectedAnswer(choiceIdx);
@@ -209,10 +198,11 @@ const QuizPage = () => {
 
         const isCorrect = choiceIdx === currentQuestion.correct_answer_index;
         const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
+        setQuestionTimes(prev => ({ ...prev, [currentIdx]: (prev[currentIdx] || 0) + timeSpent }));
 
         // Progress tracking
         if (isCorrect) {
-            addCorrectAnswer(topicId, timeSpent);
+            addCorrectAnswer(mode === 'exam' ? currentQuestion.topic_id : topicId, timeSpent);
             setShowConfetti(true);
             setShowSuccessCheck(true);
             setTimeout(() => {
@@ -220,7 +210,7 @@ const QuizPage = () => {
                 setShowSuccessCheck(false);
             }, 1500);
         } else {
-            addWrongAnswer(topicId, timeSpent);
+            addWrongAnswer(mode === 'exam' ? currentQuestion.topic_id : topicId, timeSpent);
             setShake(true);
             setShowWrongX(true);
             setTimeout(() => {
@@ -241,24 +231,6 @@ const QuizPage = () => {
             }
         }, 1500);
     };
-
-    // Record exam stats once finished
-    useEffect(() => {
-        if (showResults && mode === 'exam' && !statsRecorded && questions.length > 0) {
-            // Har bir savol uchun natijani yozamiz
-            questions.forEach((q, idx) => {
-                const isCorrect = userAnswers[idx] === q.correct_answer_index;
-                const timeTaken = questionTimes[idx] || 0;
-
-                if (isCorrect) {
-                    addCorrectAnswer(q.topic_id, timeTaken);
-                } else {
-                    addWrongAnswer(q.topic_id, timeTaken);
-                }
-            });
-            setStatsRecorded(true);
-        }
-    }, [showResults, mode, questions, userAnswers, questionTimes]);
 
     const currentQuestion = questions[currentIdx];
 
@@ -320,14 +292,12 @@ const QuizPage = () => {
         updateProgress();
     }, [showResults, pass, topicId, user]);
 
-    // Mashq rejimida javob rangini aniqlash
+    // Javob rangini aniqlash - ikkala rejimda ham
     const getChoiceStyle = (idx) => {
-        const isSelected = mode === 'exam'
-            ? userAnswers[currentIdx] === idx
-            : selectedAnswer === idx;
+        const isSelected = selectedAnswer === idx;
 
-        // Mashq rejimida javob berilgandan keyin ranglarni ko'rsatish
-        if (mode !== 'exam' && answered) {
+        // Javob berilgandan keyin ranglarni ko'rsatish
+        if (answered) {
             const isCorrect = idx === currentQuestion.correct_answer_index;
             const isUserChoice = selectedAnswer === idx;
 
@@ -355,9 +325,9 @@ const QuizPage = () => {
         };
     };
 
-    // Javob ikonkasini aniqlash
+    // Javob ikonkasini aniqlash - ikkala rejimda ham
     const getChoiceIcon = (idx) => {
-        if (mode !== 'exam' && answered) {
+        if (answered) {
             const isCorrect = idx === currentQuestion.correct_answer_index;
             const isUserChoice = selectedAnswer === idx;
 
@@ -557,9 +527,7 @@ const QuizPage = () => {
                             {getChoices(currentQuestion.choices, i18n.language).map((choice, idx) => {
                                 const choiceStyle = getChoiceStyle(idx);
                                 const icon = getChoiceIcon(idx);
-                                const isSelected = mode === 'exam'
-                                    ? userAnswers[currentIdx] === idx
-                                    : selectedAnswer === idx;
+                                const isSelected = selectedAnswer === idx;
 
                                 return (
                                     <motion.button
@@ -567,7 +535,7 @@ const QuizPage = () => {
                                         whileHover={!answered ? { x: 5 } : {}}
                                         whileTap={!answered ? { scale: 0.99 } : {}}
                                         onClick={() => handleAnswer(idx)}
-                                        disabled={mode !== 'exam' && answered}
+                                        disabled={answered}
                                         style={{
                                             padding: '1.25rem 1.5rem',
                                             borderRadius: 'var(--radius-xl)',
@@ -579,10 +547,10 @@ const QuizPage = () => {
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: '1.25rem',
-                                            cursor: (mode !== 'exam' && answered) ? 'default' : 'pointer',
+                                            cursor: answered ? 'default' : 'pointer',
                                             transition: 'all 0.3s',
                                             color: 'var(--text-primary)',
-                                            opacity: (mode !== 'exam' && answered && !icon && selectedAnswer !== idx) ? 0.6 : 1
+                                            opacity: (answered && !icon && selectedAnswer !== idx) ? 0.6 : 1
                                         }}
                                     >
                                         <div style={{
@@ -601,8 +569,8 @@ const QuizPage = () => {
                             })}
                         </div>
 
-                        {/* Mashq rejimida javob holati */}
-                        {mode !== 'exam' && answered && (
+                        {/* Javob holati - ikkala rejimda ham */}
+                        {answered && (
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -718,53 +686,6 @@ const QuizPage = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Navigation Buttons Bottom - faqat imtihon rejimida */}
-            {mode === 'exam' && (
-                <div style={{
-                    display: 'flex', justifyContent: 'space-between', marginTop: '2.5rem',
-                    gap: '1rem'
-                }}>
-                    <button
-                        disabled={currentIdx === 0}
-                        onClick={() => handleNavigate(currentIdx - 1)}
-                        style={{
-                            padding: '1rem 2rem', borderRadius: 'var(--radius-xl)',
-                            border: '1px solid var(--border-primary)', background: 'var(--surface)',
-                            fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', gap: '0.75rem',
-                            opacity: currentIdx === 0 ? 0.5 : 1
-                        }}
-                    >
-                        <ChevronLeft size={20} /> {t('quiz.prev')}
-                    </button>
-
-                    {currentIdx === questions.length - 1 ? (
-                        <button
-                            onClick={() => {
-                                const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
-                                setQuestionTimes(prev => ({ ...prev, [currentIdx]: (prev[currentIdx] || 0) + timeSpent }));
-                                setShowResults(true);
-                            }}
-                            className="btn-primary"
-                            style={{ padding: '1rem 3rem', borderRadius: 'var(--radius-xl)' }}
-                        >
-                            {t('quiz.finish')}
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => handleNavigate(currentIdx + 1)}
-                            className="btn-primary"
-                            style={{
-                                padding: '1rem 3rem', borderRadius: 'var(--radius-xl)',
-                                display: 'flex', alignItems: 'center', gap: '0.75rem'
-                            }}
-                        >
-                            {t('quiz.next')} <ChevronRight size={20} />
-                        </button>
-                    )}
-                </div>
-            )}
         </div>
     );
 };

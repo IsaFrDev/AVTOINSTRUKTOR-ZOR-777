@@ -27,6 +27,7 @@ const Dashboard = () => {
     const [topics, setTopics] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showTopics, setShowTopics] = useState(false);
+    const [error, setError] = useState(null);
 
     // Statistikalarni reactive (avtomatik yangilanadigan) qilish
     const libraryStats = React.useMemo(() => {
@@ -63,9 +64,22 @@ const Dashboard = () => {
                 questions: { length: t.questions_count }
             }));
 
+            // Mavzularni tabiiy tartibda saralash (1, 2, ... 10)
+            formattedTopics.sort((a, b) => {
+                const nameA = a.name?.uz || a.name || '';
+                const nameB = b.name?.uz || b.name || '';
+                // Agar name string bo'lsa
+                if (typeof nameA === 'string' && typeof nameB === 'string') {
+                    return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
+                }
+                return 0;
+            });
+
             setTopics(formattedTopics);
+            setError(null);
         } catch (error) {
             console.error("Dashboard error:", error);
+            setError(error);
         } finally {
             setLoading(false);
         }
@@ -199,6 +213,40 @@ const Dashboard = () => {
                 )}
             </AnimatePresence>
 
+            {error && (
+                <div style={{
+                    marginBottom: '2rem',
+                    padding: '1.5rem',
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid var(--error)',
+                    borderRadius: 'var(--radius-lg)',
+                    color: 'var(--error)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    textAlign: 'center'
+                }}>
+                    <strong style={{ fontSize: '1.1rem' }}>{t('common.error_occurred') || 'Xatolik yuz berdi'}</strong>
+                    <p>{error.message || 'Serverga ulanishda xatolik. Internet aloqasini tekshiring.'}</p>
+                    <button
+                        onClick={() => { setError(null); fetchDashboardData(); }}
+                        className="btn-primary"
+                        style={{ padding: '0.5rem 1.5rem', background: 'var(--error)' }}
+                    >
+                        {t('common.retry') || 'Qayta urinish'}
+                    </button>
+                </div>
+            )}
+
+            {
+                !error && !loading && topics.length === 0 && !showTopics && (
+                    <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', marginTop: '2rem' }}>
+                        <p>{t('dashboard.no_topics') || 'Mavzular topilmadi'}</p>
+                    </div>
+                )
+            }
+
             {/* Quick Stats */}
             <motion.div variants={itemVariants} className="dashboard-stats-grid">
                 <StatCard
@@ -230,7 +278,7 @@ const Dashboard = () => {
                     bg="rgba(245, 158, 11, 0.1)"
                 />
             </motion.div>
-        </motion.div>
+        </motion.div >
     );
 };
 

@@ -134,19 +134,23 @@ const AdminPanel = () => {
             // Better to just fetch simple and maybe map.
             // Simplified fetch:
 
-            const { data: users } = await supabase.from('profiles').select('*');
-            const { data: questions } = await supabase.from('questions').select('*, topic:topics(name)');
-            const { data: topics } = await supabase.from('topics').select('*');
+            const { data: users, error: usersError } = await supabase.from('profiles').select('*');
+            const { data: questions, error: questionsError } = await supabase.from('questions').select('*, topic:topics(name)');
+            const { data: topics, error: topicsError } = await supabase.from('topics').select('*');
+
+            if (usersError) console.error("Users fetch error:", usersError);
+            if (questionsError) console.error("Questions fetch error:", questionsError);
+            if (topicsError) console.error("Topics fetch error:", topicsError);
 
             // For topic question counts, we can do a separate query or handle it in UI.
             // Let's iterate topics to get counts.
-            const topicsWithCount = await Promise.all(topics.map(async (topic) => {
+            const topicsWithCount = topics ? await Promise.all(topics.map(async (topic) => {
                 const { count } = await supabase
                     .from('questions')
                     .select('*', { count: 'exact', head: true })
                     .eq('topic_id', topic.id);
                 return { ...topic, questions: { length: count } };
-            }));
+            })) : [];
 
             setData({
                 users: users || [],
@@ -362,12 +366,26 @@ const AdminPanel = () => {
     const confirmDelete = async () => {
         const { type, id } = deleteModal;
         try {
+            // Agar mavzu o'chirilsa, avval unga tegishli savollarni o'chiramiz (Manual Cascade Delete)
+            if (type === 'topics') {
+                const { error: questionsError } = await supabase
+                    .from('questions')
+                    .delete()
+                    .eq('topic_id', id);
+
+                if (questionsError) throw questionsError;
+            }
+
             const table = type === 'users' ? 'profiles' : (type === 'questions' ? 'questions' : 'topics');
-            await supabase.from(table).delete().eq('id', id);
+            const { error } = await supabase.from(table).delete().eq('id', id);
+
+            if (error) throw error;
+
             fetchData();
             setDeleteModal({ open: false, type: null, id: null });
         } catch (error) {
-            alert('Xatolik yuz berdi: ' + error.message);
+            console.error('Delete error:', error);
+            alert('Xatolik yuz berdi: ' + (error.message || 'Noma\'lum xato'));
         }
     };
 
