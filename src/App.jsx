@@ -87,6 +87,8 @@ function App() {
                     </ProtectedRoute>
                   } />
 
+                  <Route path="/swagger" element={<Navigate to="/swagger.html" replace />} />
+
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Router>
