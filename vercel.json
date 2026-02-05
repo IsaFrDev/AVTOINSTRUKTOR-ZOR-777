@@ -5,6 +5,10 @@
             "destination": "/swagger.html"
         },
         {
+            "source": "/swagger.json",
+            "destination": "/swagger.json"
+        },
+        {
             "source": "/swagger",
             "destination": "/swagger.html"
         },
@@ -13,7 +17,7 @@
             "destination": "/swagger.html"
         },
         {
-            "source": "/((?!swagger.html|swagger|swager).*)",
+            "source": "/((?!swagger.html|swagger|swager|swagger.json).*)",
             "destination": "/index.html"
         }
     ]
