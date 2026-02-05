@@ -1,7 +1,15 @@
 {
     "rewrites": [
         {
-            "source": "/(.*)",
+            "source": "/swagger.html",
+            "destination": "/swagger.html"
+        },
+        {
+            "source": "/swagger",
+            "destination": "/swagger.html"
+        },
+        {
+            "source": "/((?!swagger.html|swagger).*)",
             "destination": "/index.html"
         }
     ]
