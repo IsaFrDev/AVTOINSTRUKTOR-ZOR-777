@@ -9,7 +9,11 @@
             "destination": "/swagger.html"
         },
         {
-            "source": "/((?!swagger.html|swagger).*)",
+            "source": "/swager",
+            "destination": "/swagger.html"
+        },
+        {
+            "source": "/((?!swagger.html|swagger|swager).*)",
             "destination": "/index.html"
         }
     ]

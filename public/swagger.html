@@ -1,21 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Supabase API Docs</title>
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
     <style>
-        html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; overflow-y: scroll; }
-        *, *:before, *:after { box-sizing: inherit; }
-        body { margin: 0; background: #fafafa; }
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            margin: 0;
+            background: #fafafa;
+        }
     </style>
 </head>
+
 <body>
     <div id="swagger-ui"></div>
     <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" charset="UTF-8"></script>
     <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
     <script>
-        window.onload = function() {
+        window.onload = function () {
             // Build a system
             const ui = SwaggerUIBundle({
                 url: "https://vqjcyqvzjkawhwlvtjzd.supabase.co/rest/v1/",
@@ -31,8 +46,10 @@
                 layout: "StandaloneLayout",
                 persistAuthorization: true,
                 requestInterceptor: (req) => {
-                    // Supabase requires apikey header for everything
-                    // We can also inject it here if we want it to be "automatic"
+                    // Supabase requires apikey and Authorization headers for all requests, including the spec
+                    const apikey = 'sb_publishable_HaFgtq8j1lWx2AvtZkbTWg_vMl-lfjL';
+                    req.headers['apikey'] = apikey;
+                    req.headers['Authorization'] = 'Bearer ' + apikey;
                     return req;
                 }
             });
@@ -40,4 +57,5 @@
         };
     </script>
 </body>
+
 </html>
