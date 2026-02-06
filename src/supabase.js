@@ -7,7 +7,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
     console.warn('Supabase URL or Anon Key is missing! Check your .env file.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage // LockManager muammosini oldini olish uchun
+    }
+});
 
 // 1:1 Debug Connection Test (User requested)
 if (import.meta.env.DEV) {
